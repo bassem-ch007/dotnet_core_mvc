@@ -1,0 +1,50 @@
+﻿@model autoChair.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Url.Content("~/images/products/" + Model.ImageUrl)" class="card-img-top" alt="@Model.Name" />
+            }
+            else
+            {
+                <img src="~/images/no-image.png" class="img-fluid" alt="No image" />
+            }
+        </div>
+        <div class="col-md-6">
+            <h2>@Model.Name</h2>
+            <p class="text-muted">Catégorie: <strong>@Model.Category?.Name</strong></p>
+            <p>@Model.Description</p>
+
+            <div class="alert alert-info">
+                <h4 class="text-primary">@Model.Price.ToString("C2")</h4>
+                <p>Stock disponible: <strong>@Model.Stock</strong> @(Model.Stock == 0 ? "(Rupture de stock)" : "")</p>
+            </div>
+
+            @if (Model.Stock > 0)
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div class="form-group mb-3">
+                        <label for="quantity">Quantité:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1"
+                               max="@Model.Stock" class="form-control" style="width: 100px;" />
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg">🛒 Ajouter au panier</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-danger">Produit indisponible</div>
+            }
+
+            <hr />
+            <a asp-action="Index" class="btn btn-secondary">← Retour au catalogue</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,110 @@
+﻿@model IEnumerable<autoChair.Models.Product>
+
+@{
+    ViewData["Title"] = "Catalogue de Chaises";
+    var categories = ViewBag.Categories as List<Category>;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<div class="container mt-4">
+    <h1>@ViewData["Title"]</h1>
+
+    <!-- FILTRES DE RECHERCHE -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="search" placeholder="Rechercher..."
+                   value="@ViewBag.Search" />
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="categoryId">
+                <option value="">Toutes les catégories</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category.Id"
+                            selected="@(ViewBag.CategoryId == category.Id ? "selected" : null)">
+                        @category.Name
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control" name="minPrice" placeholder="Prix min"
+                   step="0.01" value="@ViewBag.MinPrice" />
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control" name="maxPrice" placeholder="Prix max"
+                   step="0.01" value="@ViewBag.MaxPrice" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+        </div>
+    </form>
+
+    <!-- AFFICHAGE DES PRODUITS -->
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@Url.Content("~/images/products/" + item.ImageUrl)"
+                                 class="card-img-top" alt="@item.Name" />
+                        }
+                        else
+                        {
+                            <img src="@Url.Content("~/images/no-image.png")"
+                                 class="card-img-top" alt="No image" />
+                        }
+
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <p class="card-text">@Html.Raw(item.Description.Substring(0, Math.Min(100, item.Description.Length)))...</p>
+                            <p class="text-primary fw-bold">@item.Price.ToString("C2")</p>
+                            <small class="text-muted">Stock: @item.Stock</small>
+                        </div>
+                        <div class="card-footer bg-white border-top">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Détails</a>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                                <input type="hidden" name="productId" value="@item.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">🛒 Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning" role="alert">
+                Aucun produit trouvé. Essayez d'autres filtres !
+            </div>
+        }
+    </div>
+
+    <!-- PAGINATION -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-categoryId="@ViewBag.CategoryId"
+                           asp-route-search="@ViewBag.Search"
+                           asp-route-minPrice="@ViewBag.MinPrice"
+                           asp-route-maxPrice="@ViewBag.MaxPrice">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Validation de la commande";
+    decimal total = ViewBag.Total;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Validation de la commande</h2>
+            <hr />
+
+            <!-- Résumé panier -->
+            <div class="alert alert-info">
+                <h5>Votre commande</h5>
+                <p class="mb-0">Montant total : <strong class="text-success" style="font-size: 1.3em;">@total.ToString("C2")</strong></p>
+            </div>
+
+            <!-- Formulaire adresse -->
+            <form method="post" class="needs-validation">
+                <div class="form-group mb-3">
+                    <label for="shippingName" class="form-label">Nom complet *</label>
+                    <input type="text" class="form-control" id="shippingName" name="shippingName" required />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="shippingAddress" class="form-label">Adresse *</label>
+                    <input type="text" class="form-control" id="shippingAddress" name="shippingAddress" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingCity" class="form-label">Ville *</label>
+                        <input type="text" class="form-control" id="shippingCity" name="shippingCity" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingPostalCode" class="form-label">Code postal *</label>
+                        <input type="text" class="form-control" id="shippingPostalCode" name="shippingPostalCode" required />
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="shippingCountry" class="form-label">Pays *</label>
+                    <input type="text" class="form-control" id="shippingCountry" name="shippingCountry" placeholder="France" required />
+                </div>
+
+                <hr />
+
+                <div class="d-flex gap-2">
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">← Retour au panier</a>
+                    <button type="submit" class="btn btn-success ms-auto">
+                        Confirmer la commande (Total : @total.ToString("C2"))
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

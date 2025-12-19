@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown"
+           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            👤 @User.Identity?.Name
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+            <li>
+                <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                    ⚙️ Mon Profil
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
+                    📦 Mes Commandes
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form method="post" asp-controller="Account" asp-action="Logout">
+                    <button type="submit" class="dropdown-item">
+                        🚪 Déconnexion
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">✍️ S'inscrire</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">🔓 Connexion</a>
+        </li>
+    </ul>
+}

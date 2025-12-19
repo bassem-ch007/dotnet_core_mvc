@@ -1,0 +1,53 @@
+﻿@model IEnumerable<autoChair.Models.Order>
+@{
+    ViewData["Title"] = "Mes commandes";
+}
+
+<div class="container mt-5">
+    <h2>Historique de mes commandes</h2>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>Vous n'avez pas encore passé de commande.</p>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                Voir le catalogue
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Date</th>
+                        <th>Montant</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+                    {
+                        <tr>
+                            <td>@order.OrderNumber</td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-success fw-bold">@order.TotalAmount.ToString("C2")</td>
+                            <td>
+                                <span class="badge bg-success">@order.Status</span>
+                            </td>
+                            <td>
+                                <a asp-action="Confirmation" asp-route-id="@order.Id" class="btn btn-sm btn-info">
+                                    Détails
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

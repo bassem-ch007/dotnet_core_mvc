@@ -1,0 +1,138 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using autoChair.Data;
+using autoChair.Models;
+
+namespace autoChair.Controllers
+{
+    
+    public class CartController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CartController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        private string GetSessionId()
+        {
+            var sessionId = HttpContext.Session.GetString("CartSessionId");
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                sessionId = Guid.NewGuid().ToString();
+                HttpContext.Session.SetString("CartSessionId", sessionId);
+            }
+            return sessionId;
+        }
+
+        // GET: /Cart/Index
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var sessionId = GetSessionId();
+            var items = await _context.CartItems
+                .Where(c => c.SessionId == sessionId)
+                .Include(c => c.Product)
+                .ToListAsync();
+
+            if (!items.Any())
+                return View(items);
+
+            //  Vérifier le stock DANS LE PANIER
+            var stockErrors = new List<string>();
+            foreach (var item in items)
+            {
+                if (item.Product == null || item.Product.Stock < item.Quantity)
+                {
+                    stockErrors.Add($"{item.Product?.Name} - Stock disponible: {item.Product?.Stock}, Demandé: {item.Quantity}");
+                }
+            }
+
+            // Passer les erreurs à la view
+            if (stockErrors.Count > 0)
+            {
+                ViewBag.StockErrors = stockErrors;
+                ViewBag.HasStockError = true;
+            }
+            else
+            {
+                ViewBag.HasStockError = false;
+            }
+
+            decimal total = items.Sum(i => i.Product!.Price * i.Quantity);
+            ViewBag.Total = total;
+
+            return View(items);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+        {
+            var sessionId = GetSessionId();
+            var product = await _context.Products.FindAsync(productId);
+
+            if (product == null)
+                return NotFound();
+
+            var cartItem = await _context.CartItems
+                .FirstOrDefaultAsync(c => c.SessionId == sessionId && c.ProductId == productId);
+
+            if (cartItem == null)
+            {
+                cartItem = new CartItem
+                {
+                    SessionId = sessionId,
+                    ProductId = productId,
+                    Quantity = quantity
+                };
+                _context.CartItems.Add(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity += quantity;
+                _context.CartItems.Update(cartItem);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
+        {
+            var item = await _context.CartItems.FindAsync(cartItemId);
+            if (item == null)
+                return NotFound();
+
+            if (quantity <= 0)
+            {
+                _context.CartItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = quantity;
+                _context.CartItems.Update(item);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromCart(int cartItemId)
+        {
+            var item = await _context.CartItems.FindAsync(cartItemId);
+            if (item != null)
+            {
+                _context.CartItems.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+    }
+}

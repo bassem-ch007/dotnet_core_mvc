@@ -1,0 +1,79 @@
+﻿@model autoChair.Models.Order
+@{
+    ViewData["Title"] = "Confirmation de commande";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">✅ Commande confirmée !</h4>
+        <p>Merci pour votre achat. Votre commande a été enregistrée avec succès.</p>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Détails de la commande</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Numéro de commande :</strong> @Model.OrderNumber</p>
+                    <p><strong>Date :</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Statut :</strong> <span class="badge bg-success">@Model.Status</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total :</strong> <span class="text-success" style="font-size: 1.3em;">@Model.TotalAmount.ToString("C2")</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Adresse de livraison</h5>
+        </div>
+        <div class="card-body">
+            <p>@Model.ShippingName</p>
+            <p>@Model.ShippingAddress</p>
+            <p>@Model.ShippingPostalCode @Model.ShippingCity</p>
+            <p>@Model.ShippingCountry</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Articles commandés</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Prix unitaire</th>
+                        <th>Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems!)
+                    {
+                        <tr>
+                            <td>@item.Product?.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.UnitPrice.ToString("C2")</td>
+                            <td>@(item.UnitPrice* item.Quantity).ToString("C2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+            ← Retour au catalogue
+        </a>
+        <a asp-controller="Orders" asp-action="MyOrders" class="btn btn-secondary">
+            Voir mes commandes
+        </a>
+    </div>
+</div>
